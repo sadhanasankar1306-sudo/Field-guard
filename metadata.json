@@ -1,0 +1,6 @@
+{
+  "name": "FieldGuard AI",
+  "description": "Reliable Multi-Plant Disease Detection with Uncertainty-Aware Diagnosis, Open-Set Rejection, and Calibrated Agricultural Decision Support.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
