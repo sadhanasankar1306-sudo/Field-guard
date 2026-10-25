@@ -2,7 +2,6 @@ import 'dotenv/config';
 import express, { Request, Response, NextFunction } from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { createServer as createViteServer } from 'vite';
 import { apiRouter } from './src/server/apiRouter';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -21,8 +20,9 @@ export function createExpressApp() {
     next();
   });
 
-  // Mount modular REST API
+  // Mount modular REST API on both '/api' and '/' to ensure robustness across Vercel rewrite behaviors
   app.use('/api', apiRouter);
+  app.use('/', apiRouter);
 
   // Global JSON payload error handler (e.g. >16MB body)
   app.use((err: any, _req: Request, res: Response, next: NextFunction) => {
@@ -47,7 +47,9 @@ export const app = createExpressApp();
 async function startServer() {
   const PORT = Number(process.env.PORT) || 3000;
 
-  if (process.env.NODE_ENV !== 'production') {
+  // Dynamically import Vite only in development to prevent bundling Vite dev server in serverless production
+  if (process.env.NODE_ENV !== 'production' && process.env.VERCEL !== '1') {
+    const { createServer: createViteServer } = await import('vite');
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: 'spa',
@@ -66,7 +68,7 @@ async function startServer() {
   });
 }
 
-// Only start the HTTP listener if executed directly (e.g. in dev or container)
+// Only start the standalone HTTP listener if not executed in Vercel serverless context
 if (process.env.VERCEL !== '1') {
   startServer();
 }
